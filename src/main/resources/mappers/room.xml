@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.project_sample.dao.accommodation.RoomDao">
+
+
+<insert id="roominsert" parameterType="RoomVo">
+insert into room
+values (seq_room_idx.nextval,
+        #{room_name},
+        '1994-04-25',
+        '1994-04-26',
+        0,
+        #{room_price},
+        #{room_people},
+        #{room_service},
+        #{room_cancel},
+        #{acc_idx})
+</insert>
+
+<select id="selectMaxIdx" resultType="int">
+        select nvl(max(room_idx),0) from room
+</select>
+
+<resultMap id="roomVoMap"  type="RoomVo">
+    <result property="room_idx"  column="room_idx" />
+    <collection   property="room_photo_list"
+                  select="selectRoomPhotoList"
+                  column="room_idx=room_idx" />
+</resultMap>
+
+<select id="selectRoomPhotoList" resultType="Room_PhotoVo">
+        select * from room_photo where room_idx = #{room_idx}
+</select>
+
+<select id="selectRoomList" parameterType="int" resultMap="roomVoMap">
+        select * from room where acc_idx = #{acc_idx}
+</select>
+
+<select id="selectRoomOne" parameterType="int" resultMap="roomVoMap">
+        select * from room where room_idx = #{room_idx}
+</select>
+
+<delete id="roomDelete" parameterType="int">
+
+        delete from room where room_idx = #{room_idx}
+</delete>
+
+
+<!-- <select id="resvRoomOne" parameterType="int" resultType="roomVomap">
+
+select
+    r.*,
+    (select count(*) from room where to_char(room_check_in,'YYYYMMDD') = #{room_check_in} and r.room_idx=room_idx) as room_use    
+from
+    (select * from room) r
+
+</select>  -->
+
+
+
+<select id="resvRoomList" parameterType="Map" resultMap="roomVoMap">
+
+select
+    r.*,
+    (select count(*) from room where to_char(room_check_in,'YYYYMMDD') = #{check_in_date} and r.room_idx=room_idx) as room_use    
+from
+    (select * from room where acc_idx = #{acc_idx}) r
+
+</select>
+
+
+</mapper>
